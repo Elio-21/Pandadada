@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Airdrop</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #e0f7fa;
+            padding: 20px;
+        }
+        h1 {
+            margin-top: 20px;
+        }
+        .info {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #ffffff;
+            border: 2px solid #00acc1;
+            border-radius: 10px;
+            display: inline-block;
+            width: 80%;
+        }
+        .boton-deslizar {
+            position: absolute; /* Cambiado a absolute */
+            top: 20px; /* Distancia desde la parte superior */
+            left: 20px; /* Distancia desde la izquierda */
+            padding: 15px 20px;
+            font-size: 16px;
+            color: white;
+            background-color: gray;
+            border: none;
+            border-radius: 10px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: color 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3); /* Sombra para el efecto 3D */
+            outline: none; /* Elimina el borde de enfoque */
+        }
+
+        .boton-deslizar::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -10%;
+            width: 30%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.2);
+            transform: skewX(-10deg);
+            animation: deslizamiento 10s linear infinite; /* Animación de deslizamiento */
+            z-index: 0;
+        }
+
+        @keyframes deslizamiento {
+            0% {
+                left: -100%; /* Comienza fuera a la izquierda */
+            }
+            50% {
+                left: 100%; /* Se mueve completamente a la derecha */
+            }
+            100% {
+                left: -100%; /* Vuelve a comenzar fuera a la izquierda */
+            }
+        }
+
+        .boton-deslizar:hover {
+            color: #fff; /* Cambia el color del texto al hacer hover */
+        }
+
+        .boton-deslizar:active {
+            background-color: #45a049; /* Cambia el color de fondo al hacer clic */
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* Reduce la sombra al hacer clic */
+            transform: translateY(2px); /* Mueve el botón hacia abajo */
+        }
+
+        .boton-deslizar span {
+            position: relative;
+            z-index: 1;
+        }
+
+        .exchange-button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 18px;
+            cursor: pointer;
+            background-color: #00acc1;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+        .exchange-button:hover {
+            background-color: #007c91;
+        }
+        .exchange-container {
+            margin-top: 20px;
+            display: inline-block;
+            background-color: #f1f1f1;
+            padding: 15px;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+    <button class="boton-deslizar" onclick="goBack()"><span>volver</span></button> <!-- Botón de volver en la parte superior izquierda -->
+    <h1>Coin</h1>
+    <div class="info">
+        <p>Recolectado</p>
+        <h2 id="totalGold">0.00000000</h2>
+        <p>.</p>
+        <h2 id="totalTokens">Tokens: 0.00000000</h2> <!-- Contador de tokens -->
+    </div>
+
+    <div class="exchange-container">
+        <h3>Cambiar por Tokens</h3>
+        <input type="number" id="goldToExchange" placeholder="Cantidad de oro" min="1" step="any">
+        <button class="exchange-button" onclick="cambiarOroPorTokens()">Cambiar</button>
+        <p id="exchangeResult"></p>
+    </div>
+
+    <script>
+        // Obtener la cantidad de oro y tokens guardados en localStorage y mostrarlos
+        window.onload = function() {
+            let gold = parseFloat(localStorage.getItem('gold')) || 0;
+            let tokens = parseFloat(localStorage.getItem('tokens')) || 0; // Cargar tokens desde localStorage
+            document.getElementById('totalGold').textContent = gold.toFixed(8);
+            document.getElementById('totalTokens').textContent = `Tokens: ${tokens.toFixed(8)}`; // Mostrar tokens
+        };
+
+        function goBack() {
+            window.location.href = 'minijuegos.html';
+        }
+
+        function cambiarOroPorTokens() {
+            let gold = parseFloat(localStorage.getItem('gold')) || 0;
+            let tokens = parseFloat(localStorage.getItem('tokens')) || 0; // Cargar tokens desde localStorage
+            let cantidadOro = parseFloat(document.getElementById('goldToExchange').value);
+            const tasaDeCambio = 0.00000001; // Tasa de cambio: 1 oro = 0.00000001 tokens
+
+            if (isNaN(cantidadOro) || cantidadOro <= 0) {
+                document.getElementById('exchangeResult').textContent = "Por favor, ingresa una cantidad válida de oro.";
+                return;
+            }
+
+            if (cantidadOro > gold) {
+                document.getElementById('exchangeResult').textContent = "No tienes suficiente oro para hacer este cambio.";
+                return;
+            }
+
+            const tokensObtenidos = cantidadOro * tasaDeCambio; // Tokens obtenidos al cambiar oro
+            gold -= cantidadOro; // Restar el oro cambiado
+            tokens += tokensObtenidos; // Sumar los tokens obtenidos
+
+            // Actualizar los valores en localStorage
+            localStorage.setItem('gold', gold); // Actualizar el oro en localStorage
+            localStorage.setItem('tokens', tokens); // Actualizar los tokens en localStorage
+
+            // Actualizar la visualización del oro y los tokens
+            document.getElementById('totalGold').textContent = gold.toFixed(8);
+            document.getElementById('totalTokens').textContent = `Tokens: ${tokens.toFixed(8)}`;
+            document.getElementById('exchangeResult').textContent = `Has cambiado ${cantidadOro} oro por ${tokensObtenidos.toFixed(8)} tokens.`;
+        }
+    </script>
+</body>
+</html>

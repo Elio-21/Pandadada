@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Puzzle Panda Bambú</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            height: 100vh;
+            background-color: cornflowerblue;
+        }
+
+        .puzzle-container {
+            display: grid;
+            grid-template-columns: repeat(3, 100px);
+            grid-template-rows: repeat(3, 100px);
+            gap: 5px;
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .puzzle-piece {
+            width: 100px;
+            height: 100px;
+            border: 2px solid #555;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.5em;
+            color: white;
+            cursor: pointer;
+            background-size: cover;
+            background-position: center;
+        }
+
+        #empty  { background-color: #ffffff; border: 2px dashed #ccc; }
+
+        .hidden {
+            display: none;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 20px;
+            background-color: #00ff00;
+            border: none;
+            cursor: pointer;
+            color: white;
+            border-radius: 5px;
+            margin: 5px;
+        }
+
+        button:hover {
+            background-color: #5e9e59;
+        }
+
+        .gold-display {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .back-button {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            color: black; /* Color del texto del botón */
+            background-color: transparent; /* Fondo transparente */
+            border: none; /* Sin borde */
+            cursor: pointer; /* Cursor de mano */
+        }
+    </style>
+</head>
+<body>
+    <button class="back-button" id="backButton">Volver</button> <!-- Botón Volver -->
+    <div class="gold-display" id="goldDisplay">Oro: 0</div>
+
+    <div class="puzzle-container hidden" id="puzzleContainer">
+        <div class="puzzle-piece" id="piece1" style="background-image: url('imagen/image1.png');">1</div>
+        <div class="puzzle-piece" id="piece2" style="background-image: url('imagen/image2.png');">2</div>
+        <div class="puzzle-piece" id="piece3" style="background-image: url('imagen/image3.png');">3</div>
+        <div class="puzzle-piece" id="piece4" style="background-image: url('imagen/image4.png');">4</div>
+        <div class="puzzle-piece" id="piece5" style="background-image: url('imagen/image5.png');">5</div>
+        <div class="puzzle-piece" id="piece6" style="background-image: url('imagen/image6.png');">6</div>
+        <div class="puzzle-piece" id="piece7" style="background-image: url('imagen/image7.png');">7</div>
+        <div class="puzzle-piece" id="piece8" style="background-image: url('imagen/image8.png');">8</div>
+        <div class="puzzle-piece empty" id="empty"></div>
+    </div>
+
+    <button id="startButton">Iniciar</button>
+
+    <script>
+        const pieces = document.querySelectorAll('.puzzle-piece');
+        let emptySlot = document.querySelector('.empty');
+        let puzzleContainer = document.getElementById('puzzleContainer');
+        let startButton = document.getElementById('startButton');
+        let goldDisplay = document.getElementById('goldDisplay');
+        let gold = 0;
+
+        startButton.addEventListener('click', () => {
+            startGame();
+        });
+
+        document.getElementById('backButton').addEventListener('click', () => {
+            // Redirige a minijuegos.html
+            window.location.href = 'minijuegos.html'; 
+        });
+
+        pieces.forEach(piece => {
+            piece.addEventListener('click', () => {
+                movePiece(piece);
+                checkWin();
+            });
+        });
+
+        function movePiece(piece) {
+            const emptyPos = emptySlot.getBoundingClientRect();
+            const piecePos = piece.getBoundingClientRect();
+
+            const isAdjacent = Math.abs(emptyPos.x - piecePos.x) + Math.abs(emptyPos.y - piecePos.y) === 105;
+
+            if (isAdjacent) {
+                const tempId = piece.id;
+                piece.id = emptySlot.id;
+                emptySlot.id = tempId;
+
+                const tempContent = piece.textContent;
+                piece.textContent = '';
+                emptySlot.textContent = tempContent;
+
+                piece.classList.add('empty');
+                emptySlot.classList.remove('empty');
+                emptySlot = piece;
+            }
+        }
+
+        function checkWin() {
+            const correctOrder = ['piece1', 'piece2', 'piece3', 'piece4', 'piece5', 'piece6', 'piece7', 'piece8', 'empty'];
+            let isCorrect = true;
+
+            pieces.forEach((piece, index) => {
+                if (piece.id !== correctOrder[index]) {
+                    isCorrect = false;
+                }
+            });
+
+            if (isCorrect) {
+                gold += 500;
+                goldDisplay.textContent = "Oro: " + gold;
+
+                // Guardar el oro en localStorage
+                localStorage.setItem('gold', parseFloat(localStorage.getItem('gold') || 0) + 500);
+
+                puzzleContainer.classList.add('hidden');
+                startButton.classList.remove('hidden');
+            }
+        }
+
+        function startGame() {
+            puzzleContainer.classList.remove('hidden');
+            startButton.classList.add('hidden');
+
+            // Armar el puzzle inicialmente
+            pieces.forEach((piece, index) => {
+                piece.classList.remove('empty');
+                piece.textContent = index < 8 ? (index + 1) : '';
+            });
+
+            // Desordenar el puzzle
+            shufflePuzzle(100); // 100 movimientos para desordenar
+        }
+
+        function shufflePuzzle(moves) {
+            for (let i = 0; i < moves; i++) {
+                const adjacentPieces = getAdjacentPieces();
+                const randomPiece = adjacentPieces[Math.floor(Math.random() * adjacentPieces.length)];
+                movePiece(randomPiece);
+            }
+        }
+
+        function getAdjacentPieces() {
+            const adjacentPieces = [];
+            pieces.forEach(piece => {
+                if (piece.id !== emptySlot.id) {
+                    const emptyPos = emptySlot.getBoundingClientRect();
+                    const piecePos = piece.getBoundingClientRect();
+                    const isAdjacent = Math.abs(emptyPos.x - piecePos.x) + Math.abs(emptyPos.y - piecePos.y) === 105;
+                    if (isAdjacent) {
+                        adjacentPieces.push(piece);
+                    }
+                }
+            });
+            return adjacentPieces;
+        }
+    </script>
+</body>
+</html>

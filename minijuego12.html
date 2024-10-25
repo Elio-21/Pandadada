@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panda Coin</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #f2f2f2;
+            margin: 0;
+            position: relative; /* Agregado para posicionar el botón "Volver" */
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        #timer, #score, #gold {
+            font-size: 20px;
+            margin-top: 10px;
+        }
+
+        .game-board {
+            display: grid;
+            grid-template-columns: repeat(3, 100px);
+            grid-template-rows: auto;
+            grid-gap: 10px;
+            margin-top: 20px;
+        }
+
+        .card {
+            width: 100px;
+            height: 100px;
+            background-color: #4CAF50;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            border-radius: 10px;
+            position: relative;
+            transition: transform 0.3s;
+            overflow: hidden;
+        }
+
+        .card img {
+            width: 90%;
+            height: 90%;
+            display: none;
+        }
+
+        .card .cover {
+            width: 100%;
+            height: 100%;
+            background-color: #333;
+            position: absolute;
+            top: 0;
+            left: 0;
+            border-radius: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 24px;
+        }
+
+        .card.flipped .cover {
+            display: none;
+        }
+
+        .card.flipped img {
+            display: block;
+        }
+
+        .card.matched {
+            background-color: lightgray;
+            pointer-events: none;
+        }
+
+        /* Estilos para los botones */
+        .btn {
+            padding: 10px 20px;
+            margin: 10px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        #back-button {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background-color: #f44336; /* Color rojo */
+            color: white;
+        }
+
+        #start-button {
+            background-color: #4CAF50; /* Color verde */
+            color: white;
+            margin-top: 400px; /* Aumentar el margen superior para bajarlo */
+        }
+    </style>
+</head>
+<body>
+
+    <button id="back-button" class="btn">Volver</button>
+    <button id="start-button" class="btn">Iniciar</button>
+
+    <div id="timer"></div>
+    <div id="score"></div>
+    <div id="gold">Oro: 0</div>
+    <div id="game-board" class="game-board"></div>
+
+    <script>
+        const images = [
+            'imagen/panda1.png',
+            'imagen/panda2.png',
+            'imagen/panda3.png',
+            'imagen/panda4.png',
+            'imagen/panda5.png',
+            'imagen/panda6.png',
+            'imagen/panda7.png',
+            'imagen/panda8.png',
+            'imagen/panda9.png',
+            'imagen/panda10.png',
+            'imagen/panda11.png',
+            'imagen/panda12.png',
+            'imagen/panda13.png',
+            'imagen/panda14.png',
+            'imagen/panda15.png',
+            'imagen/panda16.png',
+            'imagen/panda17.png',
+            'imagen/panda18.png',
+            'imagen/panda19.png',
+            'imagen/panda20.png',
+        ];
+
+        let level = 1;
+        const maxLevels = 10;
+        let flippedCards = [];
+        let matchedCards = 0;
+        let score = 0;
+        let gold = 0;
+        let timerInterval;
+        const gameBoard = document.getElementById('game-board');
+        const timerDisplay = document.getElementById('timer');
+        const scoreDisplay = document.getElementById('score');
+        const goldDisplay = document.getElementById('gold');
+        let baseTime = 20;
+        let timeLeft = baseTime;
+
+        // Agrega un evento de clic al botón "Iniciar"
+        document.getElementById('start-button').addEventListener('click', startLevel);
+        // Agrega un evento de clic al botón "Volver"
+document.getElementById('back-button').addEventListener('click', () => {
+    window.location.href = '/minijuegos.html'; // Redirigir a /minijuegos.html
+        });
+
+        function startLevel() {
+            resetGameBoard();
+            loadCards();
+            startTimer();
+            document.getElementById('start-button').style.display = 'none'; // Ocultar el botón "Iniciar"
+        }
+
+        function loadCards() {
+            const numPairs = Math.min(level + 2, Math.floor(images.length / 2));
+            const levelImages = images.slice(0, numPairs);
+            const cards = [...levelImages, ...levelImages];
+            const shuffledCards = cards.sort(() => 0.5 - Math.random());
+
+            gameBoard.style.gridTemplateColumns = 'repeat(3, 93px)';
+            gameBoard.style.gridTemplateRows = `repeat(${Math.ceil(cards.length / 3)}, 93px)`;
+
+            shuffledCards.forEach((imageSrc) => {
+                const card = document.createElement('div');
+                card.classList.add('card');
+                card.innerHTML = `
+                    <img src="${imageSrc}" alt="Panda">
+                    <div class="cover">?</div>
+                `;
+                card.addEventListener('click', flipCard);
+                gameBoard.appendChild(card);
+            });
+        }
+
+        function resetGameBoard() {
+            gameBoard.innerHTML = '';
+            flippedCards = [];
+            matchedCards = 0;
+            timeLeft = baseTime + (level - 1) * 15; // 15 segundos extra por cada nivel
+        }
+
+        function flipCard() {
+            if (flippedCards.length < 2 && !this.classList.contains('flipped')) {
+                this.classList.add('flipped');
+                flippedCards.push(this);
+
+                if (flippedCards.length === 2) {
+                    checkForMatch();
+                }
+            }
+        }
+
+        function checkForMatch() {
+            const [card1, card2] = flippedCards;
+
+            if (card1.innerHTML === card2.innerHTML) {
+                card1.classList.add('matched');
+                card2.classList.add('matched');
+                matchedCards += 2;
+                flippedCards = [];
+
+                score += 10; // 10 puntos por cada par
+                gold += 5;   // 5 monedas de oro por cada par
+                updateScoreAndGold();
+
+                if (matchedCards === gameBoard.childElementCount) {
+                    levelUp();
+                }
+            } else {
+                setTimeout(() => {
+                    card1.classList.remove('flipped');
+                    card2.classList.remove('flipped');
+                    flippedCards = [];
+                }, 1000);
+            }
+        }
+
+        function startTimer() {
+            clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                timerDisplay.textContent = `Tiempo restante: ${timeLeft}s`;
+
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    resetGame();
+                }
+            }, 1000);
+        }
+
+        function levelUp() {
+            clearInterval(timerInterval);
+            level++;
+            if (level <= maxLevels) {
+                startLevel();
+            } else {
+                resetGame(); // Reiniciar si se completan todos los niveles
+            }
+        }
+
+        function resetGame() {
+            level = 1;
+            baseTime = 20;
+            score = 0; // Reiniciar puntaje
+            gold = 0;  // Reiniciar oro
+            updateScoreAndGold();
+            startLevel();
+        }
+
+        function updateScoreAndGold() {
+            scoreDisplay.textContent = `Puntaje: ${score}`;
+            goldDisplay.textContent = `Oro: ${gold}`;
+        }
+    </script>
+</body>
+</html>

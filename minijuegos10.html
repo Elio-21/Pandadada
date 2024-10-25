@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panda Atrapa Monedas</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+        }
+
+        canvas {
+            display: block;
+        }
+
+        #gameOver {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 48px;
+            font-weight: bold;
+            color: red;
+        }
+
+        #menu {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            display: none;
+        }
+
+        #controls {
+            position: absolute;
+            top: 60%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        #controlButtons {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            font-size: 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        #restartBtn {
+            background-color: rgba(0, 128, 0, 0.7);
+            color: white;
+        }
+
+        #restartBtn:hover {
+            background-color: rgba(0, 128, 0, 1);
+        }
+
+        #backBtn {
+            background-color: rgba(255, 165, 0, 0.7);
+            color: white;
+        }
+
+        #backBtn:hover {
+            background-color: rgba(255, 165, 0, 1);
+        }
+
+        #toggleBtn {
+            background-color: rgba(0, 0, 255, 0.7);
+            color: white;
+        }
+
+        #toggleBtn:hover {
+            background-color: rgba(0, 0, 255, 1);
+        }
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas"></canvas>
+    <div id="gameOver">Game Over</div>
+
+    <div id="menu"></div>
+
+    <div id="controls">
+        <div id="controlButtons">
+            <button id="backBtn" onclick="goBack()">Volver</button>
+            <button id="restartBtn">Iniciar</button>
+            <button id="toggleBtn" onclick="togglePandaBot()">Activar Panda Bot</button>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const fondoImg = new Image();
+        fondoImg.src = 'imagen/fondo.jpg';
+
+        const pandaImg = new Image();
+        pandaImg.src = 'imagen/panda.png';
+
+        const monedaImg = new Image();
+        monedaImg.src = 'imagen/moneda.png';
+
+        let panda = {
+            x: canvas.width / 2 - 40,
+            y: canvas.height - 100,
+            width: 80,
+            height: 80,
+        };
+
+        let monedas = [];
+        let puntuacion = 0;
+        let vidas = 3;
+        let velocidadMoneda = 4;
+        let monedaInterval;
+        let gameLoop = null;
+        let pandaBotActive = false;
+
+        const restartBtn = document.getElementById('restartBtn');
+        restartBtn.addEventListener('click', iniciarJuego);
+
+        const backBtn = document.getElementById('backBtn');
+        backBtn.addEventListener('click', goBack);
+
+        function goBack() {
+            window.location.href = 'minijuegos.html';
+        }
+
+        function iniciarJuego() {
+            document.getElementById('gameOver').style.display = 'none';
+            restartBtn.style.display = 'none';
+            document.getElementById('controls').style.display = 'none';
+
+            monedas = [];
+            puntuacion = 0;
+            vidas = 3;
+            velocidadMoneda = 4;
+
+            clearInterval(gameLoop);
+            clearInterval(monedaInterval);
+            gameLoop = setInterval(update, 20);
+            monedaInterval = setInterval(crearMoneda, 1000);
+        }
+
+        function togglePandaBot() {
+            pandaBotActive = !pandaBotActive;
+            const btnText = pandaBotActive ? 'Desactivar Panda Bot' : 'Activar Panda Bot';
+            document.getElementById('toggleBtn').innerText = btnText;
+        }
+
+        function drawFondo() {
+            ctx.drawImage(fondoImg, 0, 0, canvas.width, canvas.height);
+        }
+
+        function drawPanda() {
+            ctx.drawImage(pandaImg, panda.x, panda.y, panda.width, panda.height);
+        }
+
+        function crearMoneda() {
+            monedas.push({
+                x: Math.random() * (canvas.width - 40),
+                y: 0,
+                width: 40,
+                height: 40,
+                dy: velocidadMoneda,
+                rotation: 0
+            });
+        }
+
+        function moverMonedas() {
+            for (let i = monedas.length - 1; i >= 0; i--) {
+                let moneda = monedas[i];
+                moneda.y += moneda.dy;
+                moneda.rotation += 0.1;
+
+                ctx.save();
+                ctx.translate(moneda.x + moneda.width / 2, moneda.y + moneda.height / 2);
+                ctx.rotate(moneda.rotation);
+                ctx.drawImage(monedaImg, -moneda.width / 2, -moneda.height / 2, moneda.width, moneda.height);
+                ctx.restore();
+
+                if (pandaBotActive) {
+                    // Mover el panda hacia la moneda más cercana
+                    let closestMoneda = getClosestMoneda();
+                    if (closestMoneda) {
+                        if (closestMoneda.x < panda.x) {
+                            panda.x -= 5; // Ajusta la velocidad del movimiento
+                        } else if (closestMoneda.x > panda.x + panda.width) {
+                            panda.x += 5; // Ajusta la velocidad del movimiento
+                        }
+                    }
+                }
+
+                if (
+                    moneda.y + moneda.height >= panda.y &&
+                    moneda.x + moneda.width >= panda.x &&
+                    moneda.x <= panda.x + panda.width
+                ) {
+                    monedas.splice(i, 1);
+                    puntuacion++;
+
+                    if (puntuacion % 40 === 0) {
+                        velocidadMoneda += 1.2;
+                    }
+                } else if (moneda.y > canvas.height) {
+                    monedas.splice(i, 1);
+                    vidas--;
+                    if (vidas === 0) {
+                        gameOver();
+                    }
+                }
+            }
+        }
+
+        function getClosestMoneda() {
+            let closest = null;
+            let minDistance = Infinity;
+
+            for (let moneda of monedas) {
+                let distance = Math.sqrt(
+                    Math.pow(moneda.x - (panda.x + panda.width / 2), 2) +
+                    Math.pow(moneda.y - (panda.y + panda.height / 2), 2)
+                );
+
+                if (distance < minDistance) {
+                    minDistance = distance;
+                    closest = moneda;
+                }
+            }
+
+            return closest;
+        }
+
+        window.addEventListener('touchmove', (e) => {
+            let touchX = e.changedTouches[0].clientX;
+
+            if (touchX > 0 && touchX < canvas.width) {
+                panda.x = touchX - panda.width / 2;
+            }
+            e.preventDefault();
+        });
+
+        window.addEventListener('mousemove', (e) => {
+            let mouseX = e.clientX;
+
+            if (mouseX > 0 && mouseX < canvas.width) {
+                panda.x = mouseX - panda.width / 2;
+            }
+        });
+
+        function gameOver() {
+            document.getElementById('gameOver').style.display = 'block';
+            restartBtn.style.display = 'block';
+            document.getElementById('controls').style.display = 'flex';
+            clearInterval(gameLoop);
+            clearInterval(monedaInterval);
+
+            let gold = parseFloat(localStorage.getItem('gold')) || 0;
+            gold += puntuacion;
+            localStorage.setItem('gold', gold);
+        }
+
+        function drawVidas() {
+            ctx.font = '30px Arial';
+            ctx.fillStyle = 'red';
+            const hearts = '❤️'.repeat(vidas);
+            ctx.fillText(hearts, 20, 80);
+        }
+
+        function drawPuntuacion() {
+            ctx.font = '30px Arial';
+            ctx.fillStyle = 'red';
+            ctx.fillText('Puntuación: ' + puntuacion, 20, 40);
+        }
+
+        function update() {
+            drawFondo();
+            drawPanda();
+            moverMonedas();
+            drawVidas();
+            drawPuntuacion();
+        }
+
+        // Inicializar el juego al cargar la página
+        window.onload = () => {
+            iniciarJuego();
+        };
+    </script>
+</body>
+</html>

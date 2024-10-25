@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Juegos</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: fuchsia;
+            padding: 20px;
+            position: relative; /* Añadido para posicionar el botón */
+        }
+        
+        h1 {
+            margin-top: 20px;
+        }
+        
+        .game {
+            margin: 20px auto;
+            padding: 20px;
+            border: 2px solid #00ffff;
+            border-radius: 10px;
+            width: 80%;
+            height: 300px; /* Altura para que el fondo se vea bien */
+            position: relative; /* Para colocar la imagen del minijuego */
+            overflow: hidden; /* Para evitar que la imagen se salga del contenedor */
+            transition: background-color 0.3s; /* Transición suave para el cambio de color */
+        }
+
+        .game:nth-of-type(1) {
+            background-image: url('images/fondo_juegos1.png'); /* Fondo para el minijuego 1 */
+            background-size: cover;
+            background-position: center;
+        }
+        
+        .game:nth-of-type(2) {
+            background-image: url('images/fondo_juegos2.png'); /* Fondo para el minijuego 2 */
+            background-size: cover;
+            background-position: center;
+        }
+        
+        .game:nth-of-type(3) {
+            background-image: url('images/fondo_juegos3.png'); /* Fondo para el minijuego 3 */
+            background-size: cover;
+            background-position: center;
+        }
+
+        .game img {
+            position: absolute; /* Para posicionar la imagen dentro del contenedor */
+            top: 110px; /* Espacio desde la parte superior */
+            left: 50%; /* Centrar la imagen horizontalmente */
+            transform: translateX(-50%); /* Ajustar el centrado */
+            width: 150px; /* Ajusta el tamaño según sea necesario */
+        }
+        
+        .back-button {
+            margin-top: 150px; /* Ajusta para colocar el botón debajo de la imagen */
+            padding: 10px 20px;
+            font-size: 18px;
+            cursor: pointer;
+            background-color: #00ff00;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+        
+        /* Estilo para el botón deslizar */
+        .boton-deslizar {
+            position: relative;
+            padding: 15px 20px;
+            font-size: 16px;
+            color: white;
+            background-color: gray;
+            border: none;
+            border-radius: 10px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: color 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3); /* Sombra para el efecto 3D */
+            outline: none; /* Elimina el borde de enfoque */
+        }
+
+        .boton-deslizar::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -10%;
+            width: 30%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.2);
+            transform: skewX(-10deg);
+            animation: deslizamiento 10s linear infinite; /* Animación de deslizamiento */
+            z-index: 0;
+        }
+
+        @keyframes deslizamiento {
+            0% {
+                left: -100%; /* Comienza fuera a la izquierda */
+            }
+            50% {
+                left: 100%; /* Se mueve completamente a la derecha */
+            }
+            100% {
+                left: -100%; /* Vuelve a comenzar fuera a la izquierda */
+            }
+        }
+
+        .boton-deslizar:hover {
+            color: #fff; /* Cambia el color del texto al hacer hover */
+        }
+
+        .boton-deslizar:active {
+            background-color: #45a049; /* Cambia el color de fondo al hacer clic */
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* Reduce la sombra al hacer clic */
+            transform: translateY(2px); /* Mueve el botón hacia abajo */
+        }
+
+        .boton-deslizar span {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Colores de fondo al pasar el mouse */
+        .game:hover {
+            background-color: rgba(119, 221, 119, 0.5); /* Verde pastel semi-transparente */
+        }
+    </style>
+</head>
+<body>
+
+    <button class="boton-deslizar" onclick="goBack()"><span>Volver</span></button> <!-- Botón deslizante -->
+    
+    <h1>Playground</h1>
+
+    <div class="game">
+        <h2>Minijuego 1</h2>
+        <p>.</p>
+        <img src="images/atrapa_monedas.png" alt="Imagen del minijuego 1">
+        <button class="back-button" onclick="startGame()">Iniciar</button>
+    </div>
+
+    <div class="game">
+        <h2>Minijuego 2</h2>
+        <p>.</p>
+        <img src="images/tictactoe.png" alt="Imagen del minijuego 2">
+        <button class="back-button" onclick="goToGame2()">Iniciar</button>
+    </div>
+
+    <div class="game">
+        <h2>Minijuego 3</h2>
+        <p>.</p>
+        <img src="images/minijuego3.png" alt="Imagen del minijuego 3">
+       <button class="back-button" onclick="goToGame3()">Iniciar</button>
+    </div>
+    
+    <div class="game">
+        <h2>Minijuego 4</h2>
+        <p>.</p>
+        <img src="images/minijuego4.png" alt="Imagen del minijuego 4">
+        <button class="back-button" onclick="goToMinijuego4()">Iniciar</button> <!-- Modificado -->
+    </div>
+
+  <div class="game">
+        <h2>Minijuego 5</h2>
+        <p>.</p>
+        <img src="images/minijuego5.png" alt="Imagen del minijuego 5">
+        <button class="back-button" onclick="goToGame5()">falta</button>
+    </div>
+
+    <script>
+        // Función para volver a index.html
+        function goBack() {
+            window.location.href = 'index.html'; // Cambiado para redirigir a index.html
+        }
+
+        // Función para iniciar el minijuego 1
+        function startGame() {
+            window.location.href = 'minijuegos10.html'; // Cambia por la ruta del archivo del juego
+        }
+
+        // Función para iniciar el minijuego 2
+        function goToGame2() {
+            window.location.href = 'minijuegos11.html'; // Redirigir a minijuego 2
+        }
+
+      // Función para iniciar el minijuego 3
+      function goToGame3() {
+          window.location.href = 'minijuego12.html'; // Redirigir al minijuego 3
+       }
+
+        // Función para iniciar el minijuego 4
+        function goToMinijuego4() {
+            window.location.href = 'minijuego13.html'; // Redirigir al minijuego 4
+        }
+          // Función para iniciar el minijuego 5
+      function goToGame5() {
+          window.location.href = 'minijuego14.html'; // Redirigir al minijuego 5
+       }
+        
+    </script>
+
+</body>
+</html>

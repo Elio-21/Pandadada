@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Juego de Panda</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-image: url('images/fondo.jpg'); /* Cambia 'fondo.jpg' por el nombre de tu imagen */
+            background-size: cover; /* Ajusta la imagen al tamaño de la ventana */
+            background-position: center; /* Centra la imagen de fondo */
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .panda-button {
+            background-image: url('image/panda.png');
+            background-size: cover;
+            width: 30vw;
+            height: 30vw;
+            max-width: 1500px;
+            max-height: 150px;
+            border-radius: 50%;
+            margin: 20px auto;
+            cursor: pointer;
+        }
+        .gold-counter {
+            font-size: 2rem;
+            margin-top: 55px; /* Ajustado para bajar más */
+        }
+        .diamond-button {
+            width: 150px;
+            height: 150px;
+            background-image: url('images/diamante.png'); /* Cambia 'diamante.png' por el nombre de tu imagen */
+            background-size: cover; /* Ajusta la imagen al tamaño del botón */
+            position: relative;
+            margin: 150px auto; /* Ajustado para bajar más */
+            transform: rotate(45deg);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3), inset 0 -4px 8px rgba(255, 255, 255, 0.5);
+            cursor: pointer;
+            transition: transform 1.5s;
+        }
+        .diamond-button:hover {
+            transform: rotate(225deg) scale(1.1);
+        }
+        .menu {
+            margin-top: 80px; /* Ajustado para bajar más */
+            display: flex;
+            justify-content: center;
+        }
+        .menu button {
+            padding: 5px 10px;
+            font-size: 1rem;
+            margin: 5px;
+            cursor: pointer;
+            flex: 0 0 auto;
+            max-width: 120px;
+        }
+        .top-menu {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            display: flex;
+            gap: 10px;
+        }
+        .top-menu button {
+            padding: 5px 10px;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="top-menu">
+        <button onclick="goToProfile()">☰ Menu</button>
+    </div>
+
+    <h1>Panda Coin</h1>
+    
+    <div class="gold-counter">
+        Oro: <span id="gold">0</span>
+    </div>
+
+    <div class="diamond-button" onclick="collectGold()"></div>
+
+    <div class="menu">
+        <button onclick="goToPlayground()">juegos</button>
+        <button onclick="goToAirdrop()">Airdrop</button>
+        <button onclick="goToAmigos()">Amigos</button>
+        <button onclick="goToTareas()">Tareas</button>
+    </div>
+
+    <script src="game.js"></script> <!-- Enlazar el archivo game.js -->
+
+    <script>
+        // Redirigir al Playground
+        function goToPlayground() {
+            window.location.href = 'minijuegos.html'; 
+        }
+
+        // Redirigir a la página de Airdrop
+        function goToAirdrop() {
+            window.location.href = 'airdrop.html';  
+        }
+
+        // Redirigir a la página de Amigos
+        function goToAmigos() {
+            window.location.href = 'amigos.html'; 
+        }
+
+        // Redirigir a la página de Tareas
+        function goToTareas() {
+            window.location.href = 'tareas.html'; 
+        }
+
+        // Redirigir a la configuración
+        function goToSettings() {
+            alert('Página de configuración no implementada.');
+        }
+
+        // Redirigir al perfil
+        function goToProfile() {
+            alert('Página de perfil no implementada.');
+        }
+    </script>
+    
+</body>
+</html>
